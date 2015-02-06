@@ -12,6 +12,7 @@ public class BoardDAO {
 	Connection con;
 	PreparedStatement pstmt;
 	ResultSet rs;
+	DataSource ds;
 	public BoardDAO(){
 		try{
 			Context init = new InitialContext();
@@ -52,7 +53,7 @@ public class BoardDAO {
 			Board_list_sql = "select * " ;
 			Board_list_sql = Board_list_sql + "from " ; 
 			Board_list_sql = Board_list_sql + "( " ;
-			Board_list_sql = Board_list_sql + "    select rownum rnum,board_num,board_name,board_subject, " ;
+			Board_list_sql = Board_list_sql + "    select rownum rnum,board_num,board_id,board_name,board_subject, " ;
 			Board_list_sql = Board_list_sql + "    board_content, board_file, board_re_ref,board_re_lev, " ;
 			Board_list_sql = Board_list_sql + "    board_re_seq, board_readcount, BOARD_DATE  " ;
 			Board_list_sql = Board_list_sql + "    from ( " ;
@@ -77,6 +78,7 @@ public class BoardDAO {
 				while(rs.next()){
 					BoardBean board = new BoardBean();
 					board.setBOARD_NUM(rs.getInt("BOARD_NUM"));
+					board.setBOARD_ID(rs.getString("BOARD_ID"));
 					board.setBOARD_NAME(rs.getString("BOARD_NAME"));
 					board.setBOARD_SUBJECT(rs.getString("BOARD_SUBJECT"));
 					board.setBOARD_CONTENT(rs.getString("BOARD_CONTENT"));
@@ -106,14 +108,16 @@ public class BoardDAO {
 		BoardBean board = null;
 		
 		try{
-			pstmt = con.prepareStatement("select * from board where board_num = ? ");
+			String sql = "select * from board where board_num = ?";
+			pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, num);
 			rs = pstmt.executeQuery();
 
 			if(rs.next()){
 				board = new BoardBean();
-				
+
 				board.setBOARD_NUM(rs.getInt("BOARD_NUM"));
+				board.setBOARD_ID(rs.getString("BOARD_ID"));
 				board.setBOARD_NAME(rs.getString("BOARD_NAME"));
 				board.setBOARD_SUBJECT(rs.getString("BOARD_SUBJECT"));
 				board.setBOARD_CONTENT(rs.getString("BOARD_CONTENT"));
@@ -133,7 +137,6 @@ public class BoardDAO {
 			if(pstmt!=null)try{pstmt.close();}catch(SQLException ex){}
 		}
 		return null;
-		
 	}
 	
 	//글 등록
@@ -146,28 +149,30 @@ public class BoardDAO {
 			pstmt = con.prepareStatement("select max(board_num) from board");
 			rs = pstmt.executeQuery();
 			
-			if(rs.next())
+			if(rs.next()){
 				num = rs.getInt(1)+1;
-			else
+			}else{
 				num = 1;
+			}
 			
-			sql= " INSERT INTO BOARD(BOARD_NUM,BOARD_NAME,BOARD_PASS,BOARD_SUBJECT, " ;
+			sql= " INSERT INTO BOARD(BOARD_NUM,BOARD_ID,BOARD_NAME,BOARD_PASS,BOARD_SUBJECT, " ;
 			sql= sql+ " BOARD_CONTENT, BOARD_FILE, BOARD_RE_REF,BOARD_RE_LEV, ";  
 			sql= sql+ " BOARD_RE_SEQ, BOARD_READCOUNT, BOARD_DATE) ";
-			sql= sql+ " values(?,?,?,?,?,?,?,?,?,?,sysdate) " ;
+			sql= sql+ " values(?,?,?,?,?,?,?,?,?,?,?,sysdate) " ;
 
 			
 			pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, num);
-			pstmt.setString(2, board.getBOARD_NAME());
-			pstmt.setString(3, board.getBOARD_PASS());
-			pstmt.setString(4, board.getBOARD_SUBJECT());
-			pstmt.setString(5, board.getBOARD_CONTENT());
-			pstmt.setString(6, board.getBOARD_FILE());
-			pstmt.setInt(7, num);
-			pstmt.setInt(8, 0);
+			pstmt.setString(2, board.getBOARD_ID());
+			pstmt.setString(3, board.getBOARD_NAME());
+			pstmt.setString(4, board.getBOARD_PASS());
+			pstmt.setString(5, board.getBOARD_SUBJECT());
+			pstmt.setString(6, board.getBOARD_CONTENT());
+			pstmt.setString(7, board.getBOARD_FILE());
+			pstmt.setInt(8, num);
 			pstmt.setInt(9, 0);
 			pstmt.setInt(10, 0);
+			pstmt.setInt(11, 0);
 			
 			result = pstmt.executeUpdate();
 			if(result==0) return false;
@@ -212,22 +217,23 @@ public class BoardDAO {
 			re_seq = re_seq + 1;
 			re_lev = re_lev + 1;
 			
-			sql= " insert into board(BOARD_NUM,BOARD_NAME,BOARD_PASS,BOARD_SUBJECT, " ;
+			sql= " insert into board(BOARD_NUM,BOARD_ID,BOARD_NAME,BOARD_PASS,BOARD_SUBJECT, " ;
 			sql= sql+ " BOARD_CONTENT, BOARD_FILE, BOARD_RE_REF,BOARD_RE_LEV, ";  
 			sql= sql+ " BOARD_RE_SEQ, BOARD_READCOUNT, BOARD_DATE) ";
-			sql= sql+ " values(?,?,?,?,?,?,?,?,?,?,sysdate) " ;
+			sql= sql+ " values(?,?,?,?,?,?,?,?,?,?,?,sysdate) " ;
 
 			pstmt = con.prepareStatement(sql);
 			pstmt.setInt(1, num);
-			pstmt.setString(2, board.getBOARD_NAME());
-			pstmt.setString(3, board.getBOARD_PASS());
-			pstmt.setString(4, board.getBOARD_SUBJECT());
-			pstmt.setString(5, board.getBOARD_CONTENT());
-			pstmt.setString(6,""); //답장에는 파일을 업로드 하지 않음
-			pstmt.setInt(7, re_ref);
-			pstmt.setInt(8, re_lev);
-			pstmt.setInt(9, re_seq);
-			pstmt.setInt(10, 0);
+			pstmt.setString(2, board.getBOARD_ID());
+			pstmt.setString(3, board.getBOARD_NAME());
+			pstmt.setString(4, board.getBOARD_PASS());
+			pstmt.setString(5, board.getBOARD_SUBJECT());
+			pstmt.setString(6, board.getBOARD_CONTENT());
+			pstmt.setString(7,""); //답장에는 파일을 업로드 하지 않음
+			pstmt.setInt(8, re_ref);
+			pstmt.setInt(9, re_lev);
+			pstmt.setInt(10, re_seq);
+			pstmt.setInt(11, 0);
 			
 			result = pstmt.executeUpdate();
 			return num;

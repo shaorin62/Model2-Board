@@ -13,6 +13,10 @@
 	int startpage=((Integer)request.getAttribute("startpage")).intValue();
 	int endpage=((Integer)request.getAttribute("endpage")).intValue();
 	
+	String id = null;
+	if(session.getAttribute("id")!=null){
+		id = (String)session.getAttribute("id");
+	}
 %>
 
 <html>
@@ -127,7 +131,11 @@
 <% } %>
 	<tr align = "right">
 		<td colspan = "5">
-			<a href ="./BoardWrite.do">글쓰기</a>
+			<%
+				if(id!=null && id.equals("admin")){%>
+				<a href ="./MemberListAction.me">회원관리</a>
+			<% }%>
+				<a href ="./BoardWrite.do">글쓰기</a>
 		</td>
 	</tr>	
 </table>

@@ -4,6 +4,7 @@ import java.sql.Date;
 
 public class BoardBean {
 	private int BOARD_NUM;
+	private String BOARD_ID;
 	private String BOARD_NAME;
 	private String BOARD_PASS;
 	private String BOARD_SUBJECT;
@@ -22,6 +23,15 @@ public class BoardBean {
 	public void setBOARD_NUM(int board_num){
 		BOARD_NUM = board_num;
 	}
+	
+	public String getBOARD_ID(){
+		return BOARD_ID;
+	}
+	
+	public void setBOARD_ID(String board_id){
+		BOARD_ID = board_id;
+	}
+	
 	public String getBOARD_NAME(){
 		return BOARD_NAME;
 	}
